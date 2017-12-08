@@ -64,13 +64,7 @@
             }
         })
     }
-    function uiArray(config){
-        if (typeof config === "undefined") config = {};
-        if (config.ref) this.ref = config.ref;
-        this.length = 0;
-    }
-    uiArray.prototype = new Array;
-    uiArray.prototype.each = uiArray.prototype.forEach;
+    
     function uiNode(nodeDef){
         if (typeof nodeDef === "undefined") nodeDef = {};
         var undefined;
@@ -92,16 +86,7 @@
             this.elements.each(function(element, el){
                 updateElement(element, el)
             });
-            function updateElement(element, el, ind){
-                if (element instanceof uiArray && typeof ind === "undefined"){
-                    element.each(function(item, i){
-                        updateElement(element, el, i);
-                    })
-                    return;
-                }
-                else if (element instanceof uiArray){
-                    element = element[ind];
-                } 
+            function updateElement(element, el){
                 if (element.childComponents){
                     element.childComponents.each(function(item){
                         item.update(config);
@@ -173,14 +158,13 @@
             }
         }        
         
-        function uiAttr(element, el, ind){
+        function uiAttr(element, el){
             var moduleName = templateDef.module?templateDef.module.name:"";
             var factoryName = templateDef.factory?templateDef.factory.name:"";
             var attr = {};
             if (moduleName) attr["d3ui-module"] = moduleName;
             if (factoryName) attr["d3ui-factory"] = factoryName;
             if (el) attr["d3ui-node"] = el;
-            if (ind) attr["d3ui-index"] = ind;
             if (element.id) attr["d3ui-id"] = element.id;
             return { attr:attr }
         }
@@ -188,19 +172,14 @@
             elements.each(function(element, el){
                 appendElement(element, el);
             })
-            function appendElement(element, el, ind){
-                if (element instanceof uiArray && typeof ind === "undefined"){
-                    element.each(function(item, i){
-                        appendElement(element, el, i);
-                    })
-                    return;
-                }
-                else if (element instanceof uiArray) element = element[ind];
+            function appendElement(element, el){
+               
                 element.parent = parentElement;
                 element.id = nodeIdGen.getId();
                 element.selector = element.node + "[d3ui-id='"+element.id+"']";
                 
                 if (element.data.array) {
+					element.type = "join";
                     var selection = parentElement.selection;
                     var data = selection.selectAll(element.selector).data(element.data.array, element.data.key);
                     
@@ -209,26 +188,28 @@
                     
                     element.entered = data.enter().append(element.node)
                         .applyAll(element.enter)
-                        .applyAll(uiAttr(element, el, ind));
+                        .applyAll(uiAttr(element, el));
                     if (element.on.enter && element.entered && element.entered.nodes().length) element.on.enter.call(element);
                     
                     element.selection = element.entered.merge(data)
                         .applyAll(element.update);
                 }
                 else {
-                    if (parentElement.data && parentElement.data.array && parentElement.entered){
+                    if (parentElement.type  === "join"){
+                        element.type = "join";
                         element.entered = parentElement.entered.append(element.node)
                             .applyAll(element.enter)
-                            .applyAll(uiAttr(element, el, ind));
+                            .applyAll(uiAttr(element, el));
                         if (element.on.enter && element.entered && element.entered.nodes().length) element.on.enter.call(element);
                     
                         element.selection = parentElement.selection.select(element.selector)
                             .applyAll(element.update);
                     }
                     else{
+						element.type = "element";
                         element.selection = parentElement.selection.append(element.node)
                             .applyAll(element.enter)
-                            .applyAll(uiAttr(element, el, ind));
+                            .applyAll(uiAttr(element, el));
                     }
                 }
                 if (element.datum.array){
@@ -252,14 +233,8 @@
             elements.each(function(element, el){
                 joinElement(element, el);
             })
-            function joinElement(element, el, ind){
-                if (element instanceof uiArray && typeof ind === "undefined"){
-                    element.each(function(item, i){
-                        joinElement(element, el, i);
-                    })
-                    return;
-                }
-                else if (element instanceof uiArray) element = element[ind];
+            function joinElement(element, el){
+                
                 if (element.data.array){
                     var selection = parentElement.selection;
                     var data = selection.selectAll(element.selector).data(element.data.array, element.data.key);
@@ -269,16 +244,16 @@
                     
                     element.entered = data.enter().append(element.node)
                         .applyAll(element.enter)
-                        .applyAll(uiAttr(element, el, ind));
+                        .applyAll(uiAttr(element, el));
                     if (element.on.enter && element.entered && element.entered.nodes().length) element.on.enter.call(element);
                     
                     element.selection = element.entered.merge(data)
                         .applyAll(element.update);
                 }
-                else if (parentElement.data && parentElement.data.array && parentElement.entered){
+                else if (parentElement.type  === "join"){
                     element.entered = parentElement.entered.append(element.node)
                         .applyAll(element.enter)
-                        .applyAll(uiAttr(element, el, ind))
+                        .applyAll(uiAttr(element, el))
                         .applyAll(element.update);
                     if (element.on.enter && element.entered && element.entered.nodes().length) element.on.enter.call(element);
                     element.selection = parentElement.selection.select(element.selector);
@@ -291,17 +266,9 @@
             elements.each(function(element, el){
                 updateElement(element, el);
             })
-            function updateElement(element, el, ind){
-                if (element instanceof uiArray && typeof ind === "undefined"){
-                    element.each(function(item, i){
-                        updateElement(element, el, i);
-                    })
-                    return;
-                }
-                else if (element instanceof uiArray) element = element[ind];
-                
+            function updateElement(element, el){                
                 var selection = element.selection;
-                if (config.transition)    selection = selection.transition(config.transition);
+                if (config.transition) selection = selection.transition(config.transition);
                 selection.applyAll(element.update);
                 
                 if (element.datum.array){
