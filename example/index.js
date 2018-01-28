@@ -2,7 +2,7 @@
 require.config({
     paths: {
 		d3:"../lib/d3",
-		ui:"../lib/ui/ui",
+		ui:"../ui",
 		css:"../lib/css",
 		text:"../lib/text",
 		moment:"../lib/moment"        
