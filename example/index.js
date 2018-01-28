@@ -64,14 +64,6 @@ function (
    
     templateTree.enter(layout.ref.graph);
     templateTree.setRoot(document.body);
-    
-    
-    var layout1 = new Layout();
-    layout1.enter(document.body); 
-    var layout2 = new Layout();
-    layout2.enter(document.body); 
-    var layout3 = new Layout();
-    layout3.enter(document.body); 
         
 	function Layout(templateDef){
 		templateDef || (templateDef = {});
