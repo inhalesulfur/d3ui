@@ -675,8 +675,17 @@ define([
         }
         function ReqursiveObject(config){ 
             config || (config = {});
-            var data = config.data || {}; 
-            ui.Template.call(this, {factory:"ReqursiveObject"}); 
+            config.constructors || (config.constructors = {});
+			var constructors = {
+				Object:config.constructors.Object || ReqursiveObject,
+				Array:config.constructors.Array || ReqursiveObject,
+				Primitive:config.constructors.Primitive || Primitive,
+			}
+			var ObjectConstructor = config.ObjectConstructor || ReqursiveObject;
+			var ArrayConstructor = config.ArrayConstructor || ReqursiveObject;
+			var PrimitiveConstructor = config.PrimitiveConstructor || Primitive;
+            var data = config.data; 
+            ui.Template.call(this, {factory:config.factory || "ReqursiveObject"}); 
             this.elements.wrap = new ui.Node({ref:"wrap"}); 
 			this.elements.wrap.childs.fields = new ui.Node({ref:"fields"}); 
             this.elements.wrap.childs.fields.childs.arrow = new ui.Node({node:"span", ref:"arrow"}); 
@@ -712,14 +721,17 @@ define([
                 else if (d.value instanceof Object) return "}"; 
                 return ""; 
             } 
-            this.ref.fields.data.array = function(){ 
-                var arr = [];
-                if (data instanceof Array) { 
+            this.ref.fields.data.array = function(d){ 
+				var sourceData;
+				if (data) sourceData = data;
+				else if (d) sourceData = d.value;
+                var targetArray = [];
+                if (sourceData instanceof Array) { 
 					var partitionSize = 100;
-					if (data.length > partitionSize){
+					if (sourceData.length > partitionSize){
 						var partition = new Partition;
 						var partitions = [];
-						for (var i = 0; i < data.length; i++){
+						for (var i = 0; i < sourceData.length; i++){
 							partition[i] = data[i];
 							if (!((i+1)%partitionSize)){
 								var start = i - partitionSize + 1;
@@ -727,27 +739,27 @@ define([
 								partitions.push({start:start, end:end, partition:partition})
 								partition = new Partition;
 							}
-							else if (i === data.length - 1){
+							else if (i === sourceData.length - 1){
 								var start = i-i%partitionSize;
 								var end = i;
 								partitions.push({start:start, end:end, partition:partition})
 								partition = new Partition;
 							}
 						}
-                    	arr = partitions.map(function(d, i) { return {key:"["+d.start+"..."+d.end+"]", value:d.partition}});
+                    	targetArray = partitions.map(function(d, i) { return {key:"["+d.start+"..."+d.end+"]", value:d.partition}});
 						
 					}
 					else{
-                    	arr = data.map(function(d, i) { return {key:i, value:d}});
+                    	targetArray = sourceData.map(function(d, i) { return {key:i, value:d}});
 					} 
                 } 
                 else{ 
-                    for (var i in data){ 
-                        if (!data.hasOwnProperty(i)) continue; 
-                            arr.push({key:i, value:data[i]}) 
+                    for (var i in sourceData){ 
+                        if (!sourceData.hasOwnProperty(i)) continue; 
+                            targetArray.push({key:i, value:sourceData[i]}) 
                     } 
                 } 
-                return arr; 
+                return targetArray; 
             }
             function Partition(){};
             var valueNode = this.ref.value; 
@@ -756,24 +768,27 @@ define([
                 if (d.value instanceof Object){ 
                     if (valueDom.uiChild instanceof HiddenObject){ 
                         valueDom.uiChild.exit(); 
-                        valueDom.uiChild = new ReqursiveObject({data:d.value}); 
+						if (d.value instanceof Array){ 
+							valueDom.uiChild = new constructors.Array({constructors:constructors});
+						}
+						else{
+							valueDom.uiChild = new constructors.Object({constructors:constructors}); 
+						}
                         valueDom.uiChild.enter(valueDom); 
-                        valueDom.uiChild.update({data:d.value});
                         valueDom.style.display = "block";
                         this.innerHTML = ui.symbols.utf8.arrow.down;
                     } 
-                    else if (valueDom.uiChild instanceof ReqursiveObject){ 
+                    else{ 
                         valueDom.uiChild.exit(); 
-                        valueDom.uiChild = new HiddenObject({data:d.value}); 
+                        valueDom.uiChild = new HiddenObject(); 
                         valueDom.uiChild.enter(valueDom); 
-                        valueDom.uiChild.update({data:d.value});
                         valueDom.style.display = "inline-block"; 
                         this.innerHTML = ui.symbols.utf8.arrow.right;
                     } 
                 } 
             } 
             this.ref.value.update.style.display = function(d, i){ 
-                if (this.uiChild instanceof ReqursiveObject){ 
+                if (this.uiChild instanceof constructors.Array || this.uiChild instanceof constructors.Object){ 
                     return "block" 
                 } 
                 return "inline-block"; 
@@ -781,64 +796,83 @@ define([
             this.ref.value.on.enter = function(){ 
                 this.entered.each(function(d, i){ 
                     if (d.value instanceof Object){ 
-                        this.uiChild = new HiddenObject({data:d.value}); 
+                        this.uiChild = new HiddenObject(); 
                         this.uiChild.enter(this); 
-                        this.uiChild.update({data:d.value});
                     } 
                     else{ 
-                        this.uiChild = new Primitive({data:d.value}); 
+                        this.uiChild = new constructors.Primitive(); 
                         this.uiChild.enter(this); 
-                        this.uiChild.update({data:d.value});
                     } 
                 }) 
             } 
             this.ref.value.on.update = function(){ 
                 this.selection.each(function(d, i){ 
                     if (d.value instanceof Object){
-                        if (this.uiChild instanceof Primitive){
+                        if (this.uiChild instanceof constructors.Primitive){
                             this.uiChild.exit(); 
-                            this.uiChild = new HiddenObject({data:d.value}); 
+                            this.uiChild = new HiddenObject(); 
                             this.uiChild.enter(this); 
-                            this.uiChild.update({data:d.value});
+                            this.uiChild.update();
                         }
-                        else if (this.uiChild instanceof ReqursiveObject || this.uiChild instanceof HiddenObject){
-                            this.uiChild.update({data:d.value}); 
+                        else if (this.uiChild instanceof HiddenObject){
+                            this.uiChild.update(); 
                         }
+						else{
+							if (d.value instanceof Array && !(this.uiChild instanceof constructors.Array)){
+								this.uiChild.exit(); 
+								this.uiChild = new constructors.Array({constructors:constructors});
+								this.uiChild.enter(this); 
+								this.uiChild.update();
+							}
+							else if (!(this.uiChild instanceof constructors.Object)){
+								this.uiChild.exit(); 
+								this.uiChild = new constructors.Object({constructors:constructors});
+								this.uiChild.enter(this); 
+								this.uiChild.update();
+							}
+							else {
+								this.uiChild.update();
+							}
+						}
                     } 
                     else{ 
-                        if (this.uiChild instanceof ReqursiveObject || this.uiChild instanceof HiddenObject){
-                            this.uiChild.exit(); 
-                            this.uiChild = new Primitive({data:d.value}); 
-                            this.uiChild.enter(this);
-                            this.uiChild.update({data:d.value});
+                        if (this.uiChild instanceof constructors.Primitive){
+                            this.uiChild.update();
                         }
                         else{ 
-                            this.uiChild.update({data:d.value}); 
+                            this.uiChild.exit(); 
+                            this.uiChild = new constructors.Primitive(); 
+                            this.uiChild.enter(this);
+                            this.uiChild.update(); 
                         } 
                     } 
                 }) 
             } 
         } 
         function HiddenObject(config){
+            config || (config = {});
             var data = config.data; 
             ui.Template.call(this, {factory:"HiddenObject"}); 
             this.elements.content = new ui.Node({node:"span", ref:"content"}); 
             this.updateRef(); 
-            this.ref.content.update.html = function() { return "..." }; 
+            this.ref.content.update.html = function(d) { return "..." }; 
             var baseUpdate = this.update; 
             this.update = function(config){ 
+				config || (config = {});
                 data = config.data; 
                 baseUpdate.call(this); 
             }; 
         } 
         function Primitive(config){ 
+            config || (config = {});
             var data = config.data; 
             ui.Template.call(this, {factory:"Primitive"}); 
             this.elements.value = new ui.Node({node:"span", ref:"value"}); 
-            this.elements.value.update.html = function() { return data }; 
+            this.elements.value.update.html = function(d) { return d.value }; 
             this.updateRef(); 
             var baseUpdate = this.update; 
             this.update = function(config){
+				config || (config = {});
                 data = config.data; 
                 baseUpdate.call(this); 
             }; 
