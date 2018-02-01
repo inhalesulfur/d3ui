@@ -1,0 +1,43 @@
+<collection key='enter'>
+    
+</collection>
+<collection key='kpi'>
+     <cube key='value'>
+        <definition qSuppressZero='true' qSuppressMissing='true' qMode='S' qStateName='1'>
+        </definition>
+        <datafetch>
+            <page top='0'  left='0' width='auto' height='100'></page>
+            <page top='100'  left='0' width='auto' height='100'></page>
+        </datafetch>
+        <dimensions>
+            <dimension qNullSuppression='true' type='qText' target='kpi_id'>[kpi_source_id]</dimension>
+            <dimension qNullSuppression='true' type='qText' target='kpi_name'>[reg_kpi_name]</dimension>
+            <dimension qNullSuppression='true' type='qText' target='kpi_unit'>[reg_kpi_unit]</dimension>
+            <dimension qNullSuppression='true' type='qText' target='org_code'>[org_code]</dimension>
+            <dimension qNullSuppression='true' type='qText' target='org_name'>[org_name]</dimension>
+            <dimension qNullSuppression='true' type='moment:DD.MM.YYYY' target='kpi_report_date'>[kpi_report_date]</dimension>
+            <dimension qNullSuppression='true' type='qText' target='kpi_report_type'>[kpi_report_type]</dimension>
+            <dimension qNullSuppression='false' type='qText' target='kpi_value'>$(kpi_value)</dimension>
+            <dimension qNullSuppression='true' type='qText' target='block_name'>[reg_kpi_block_name]</dimension>
+            <dimension qNullSuppression='true' type='qText' target='segment_name'>[reg_segment_name]</dimension>
+        </dimensions>
+        <measures>
+            <measure qNullSuppression='true'>
+				Count(distinct{1
+                    *<[kpi_report_date_num] = {">=$(#=FirstSortedValue({1
+                            *<[kpi_report_date] = {'$(kpi_report_date)'}>
+                            *<[kpi_report_type] = {'$(kpi_report_type)'}>
+                            *<[org_code] = {$(org_code_list)}>
+                            *<[kpi_source_id] = {$(kpi_id_list)}>
+                        } distinct [kpi_report_date_num],  -[kpi_report_date_num], 1))"
+                    }>
+                    *<[kpi_report_date] = {'$(kpi_report_date)'}>
+                    *<[kpi_report_type] = {'$(kpi_report_type)'}>
+                    *<[org_code] = {$(org_code_list)}>
+                    *<[kpi_source_id] = {$(kpi_id_list)}>
+                    -<[$(kpi_value)] = {'null'}>
+                }[kpi_source_id])
+            </measure>
+        </measures>
+    </cube>
+</collection> 

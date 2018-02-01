@@ -1,0 +1,168 @@
+/* DropButton */
+[d3ui-module=Chat][d3ui-factory=DropButton][d3ui-node=button]{
+    background-color:rgb(25, 123, 177);
+    z-index:2000;
+    background:#fea300 url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACEAAAAeCAMAAACVFoclAAAAMFBMVEX/pA7+/v7/pRL/2qv/tEr/pyD/+vX/vmX/47//8d//xXj/9en/68//rjf/z5H/t1VsawP8AAAA1klEQVQoz41T2Q7DIAxLwn32//92JLCNaYXihxqB5Vo5gAiAgD+kqw8WbcoqGr6WB2GBiQG/sEqP+4/Cze8CZWYNKfxH0F+F8XgH6+Cd8V7QJNfwqLhCKuKhcQ0lHn6jQN08dhbdpG4V1gDlrQIdkJXQ0RSuWnKdgzO656tQhrKhXXEB2FUP5iCiSL03GIQj5sGHip5j/Zc6eJ3UHdQDnmv60Bc46C0czMd+xvqsP84pwIXLWad1kp99IV4nf79zXdFaZGOr3bS3ALMiplzLvMlEfKB+fgEarAfHt7J/6gAAAABJRU5ErkJggg==) no-repeat 19px 10px;
+    border-bottom-left-radius: 50%;
+    border-top-left-radius: 50%;
+    cursor: pointer;
+    -webkit-box-shadow: 0 0 15px rgba(0,0,0,.35);
+    box-shadow: 0 0 15px rgba(0,0,0,.35);
+
+}
+[d3ui-module=Chat][d3ui-factory=DropButton][d3ui-node=label]{
+    color: #fff;
+    font-size: 14px;
+    position: absolute;
+    bottom: 3px;
+    left: 26px;
+    font-weight: 700;
+}
+[d3ui-module=Chat][d3ui-factory=DropButton][d3ui-node=drop]{
+    background-color:white;
+    z-index:2000;
+    border-radius: 5px 5px 5px 5px;
+    position:relative;
+    top:34px;
+    z-index:900;
+    border:1px solid black;
+    //overflow:hidden;
+}
+[d3ui-module=Chat][d3ui-factory=DropButton][d3ui-node=label]{
+    color:white;
+    border:none;
+}
+/* Layout */
+[d3ui-module=Chat][d3ui-factory=Layout][d3ui-node=body]{
+    height:calc(100% - 50px);
+    padding:5px;
+}
+[d3ui-module=Chat][d3ui-factory=Layout][d3ui-node=foot]{
+    width:calc(100% - 120px);
+    height:50px;
+    overflow:hidden;
+    padding:8px;
+}
+/* MessageBox */
+[d3ui-module=Chat][d3ui-factory=MessageBox][d3ui-node=wrap]{
+    height:100%;
+    padding:0px 5px 0px 5px;
+    overflow-y:scroll;
+}
+[d3ui-module=Chat][d3ui-factory=MessageBox][d3ui-node=message]{
+    border-bottom:0.5px solid black;
+    display:table;
+    table-layout:fixed;
+    width:100%;    
+    min-height:50px;
+}
+[d3ui-module=Chat][d3ui-factory=MessageBox][d3ui-node=icon]{
+    display:table-cell;
+    width:50px;
+    padding:5px 0px 0px 0px;
+}
+[d3ui-module=Chat][d3ui-factory=MessageBox][d3ui-node=content]{
+    display:table-cell;
+    vertical-align:top;
+}
+[d3ui-module=Chat][d3ui-factory=MessageBox][d3ui-node=sender]{
+    font-weight:bold;
+}
+[d3ui-module=Chat][d3ui-factory=MessageBox][d3ui-node=time]{
+    float:right;
+}
+/* UserIcon */
+[d3ui-module=Chat][d3ui-factory=UserIcon][d3ui-node=icon]{
+    height: 40px;
+    width: 40px;
+    line-height: 40px;
+    border-radius: 100%;
+    background:#fea300;
+    //background: rgb(74, 163, 0);
+    text-align:center;
+}
+[d3ui-module=Chat][d3ui-factory=UserIcon][d3ui-node=text]{
+    font-size: 16px;
+    color: white;
+    vertical-align: middle;
+    line-height: normal;
+}
+/* KpiMessage */
+[d3ui-module=Chat][d3ui-factory=KpiMessage][d3ui-node=key]{
+    display:inline-block;
+}
+[d3ui-module=Chat][d3ui-factory=KpiMessage][d3ui-node=value]{
+    display:inline-block;
+}
+[d3ui-module=Chat][d3ui-factory=KpiMessage][d3ui-node=rows]{
+    border:1px solid black;
+}
+[d3ui-module=Chat][d3ui-factory=KpiMessage][d3ui-node=cells]{
+    padding:0px 2px 0px 2px;
+}
+[d3ui-module=Chat][d3ui-factory=KpiMessage][d3ui-node=body]{
+    max-height:500px;
+    overflow-y:auto;
+}
+/* OptionMessage */
+[d3ui-module=Chat][d3ui-factory=OptionMessage][d3ui-node=body]{
+    max-height:200px;
+    overflow-y:auto;
+}
+/* Resizer */
+
+[d3ui-module=Chat][d3ui-factory=Resizer][d3ui-node=wrap]{
+    pointer-events:none;
+    position:absolute;
+    left:0px;
+    top:0px;
+    z-index:3000;
+}
+[d3ui-module=Chat][d3ui-factory=Resizer][d3ui-node=left]{
+    pointer-events:auto;
+    position:absolute;
+    left:-2px;
+    top:0px;
+    width:4px;
+    //background-color:green;
+    cursor:ew-resize;
+}
+[d3ui-module=Chat][d3ui-factory=Resizer][d3ui-node=top]{
+    pointer-events:auto;
+    position:absolute;
+    left:0px;
+    top:-2px;
+    height:4px;
+    //background-color:green;
+    cursor:ns-resize;
+}
+[d3ui-module=Chat][d3ui-factory=Resizer][d3ui-node=bottom]{
+    pointer-events:auto;
+    position:absolute;
+    left:0px;
+    bottom:2px;
+    height:4px;
+    //background-color:green;
+    cursor:ns-resize;
+}
+[d3ui-module=Chat][d3ui-factory=Resizer][d3ui-node=leftTop]{
+    pointer-events:auto;
+    position:absolute;
+    left:-3px;
+    top:-3px;
+    width:6px;
+    height:6px;
+    //background-color:green;
+    cursor:nw-resize;
+    z-index:3001;
+}
+[d3ui-module=Chat][d3ui-factory=Resizer][d3ui-node=leftBottom]{
+    pointer-events:auto;
+    position:absolute;
+    left:-3px;
+    width:6px;
+    height:6px;
+    //background-color:green;
+    cursor:sw-resize;
+    z-index:3001;
+}

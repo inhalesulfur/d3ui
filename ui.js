@@ -1,10 +1,14 @@
-define([
+﻿define([
 	"d3",
 	"moment",
+	"codemirror",
+	"javascript",
+	"css!codemirror.css",
     "css!ui.css"
 ],function (
 	d3,
-    moment
+    moment,
+    codemirror
 ) {
 	"use strict";
     var undefined;
@@ -51,6 +55,34 @@ define([
                 else
                     func.call(this, this[i], i);
             }
+        }
+        uiCollection.prototype.setBefore = function (beforeKey, key, value){
+            var setted = false;
+            this.each(function(d, i){
+                if (i === beforeKey){
+                    setted = true;
+                    this[key] = value;
+                }
+                if (setted){
+                    delete this[i];
+                    this[i] = d;
+                }
+            })
+            if (!setted) throw new Error("key " + beforeKey + " not found");
+        }
+        uiCollection.prototype.setAfter = function (afterKey, key, value){
+            var setted = false;
+            this.each(function(d, i){
+                if (setted){
+                    delete this[i];
+                    this[i] = d;
+                }
+                if (i === afterKey){
+                    setted = true;
+                    this[key] = value;
+                }
+            })
+            if (!setted) throw new Error("key " + afterKey + " not found");
         }
         function uiReference(){
         }
@@ -294,7 +326,6 @@ define([
 					}
 				}
 				
-				element.selection.applyAll(element.update);
 				if (element.datum.array){
 					element.selection.datum(element.datum.array).applyAll(element.datum.update);
 				}
@@ -341,8 +372,7 @@ define([
                         callTemplateDispatch("update");
 					}
 					
-					element.selection = element.entered.merge(data)
-						.applyAll(element.update);
+					element.selection = element.entered.merge(data);
 				}
 				else if (parentElement.type === "join"){
                     var selectionChanged = checkSelectionChanged(parentElement.selection["_groups"], element.selection["_groups"]);
@@ -355,9 +385,11 @@ define([
                             callTemplateDispatch("update");
                         }
                     }
-					element.selection = parentElement.selection.select(element.selector);
-					
+                    element.selection = parentElement.selection.select(element.selector);
 				}
+                else{
+                    element.selection = parentElement.selection.select(element.selector);
+                }
 				joinElements(templateDef, element, element.childs);
 			}
             function checkSelectionChanged(parentGroup, nodeGroup){
@@ -386,7 +418,7 @@ define([
 				else if (element instanceof ui.Array) element = element[ind];
 				if (element.datum.array && typeof element.data.array === "undefined"){
 					element.selection.datum(function(){
-						return this.parentElement["__data__"];
+						return this.parentNode["__data__"];
 					})
 				}
 				var selection = element.selection;
@@ -462,6 +494,17 @@ define([
                         width:width + "px",
                         height:height + "px"
                     }
+                }
+            }
+            this.Select = SelectNode;
+            function SelectNode(config){
+                config = config || {};
+                ui.Node.call(this, {node:"select"});
+                this.childs.option = new ui.Node({node:"option"});
+                if (config.ref) {
+                    var rootRef = config.ref += ".";
+                    this.ref = rootRef+"select";
+                    this.childs.option.ref = rootRef+"option";
                 }
             }
         } 
@@ -676,11 +719,15 @@ define([
         function ReqursiveObject(config){ 
             config || (config = {});
             config.constructors || (config.constructors = {});
+			var showConstructor = config.showConstructor || false;
+			var showPrototype = config.showPrototype || false;
 			var constructors = {
 				Object:config.constructors.Object || ReqursiveObject,
 				Array:config.constructors.Array || ReqursiveObject,
-				Primitive:config.constructors.Primitive || Primitive,
+				Function:config.constructors.Function || FunctionListing,
+				Primitive:config.constructors.Primitive || Primitive
 			}
+			config.constructors = constructors;
 			var ObjectConstructor = config.ObjectConstructor || ReqursiveObject;
 			var ArrayConstructor = config.ArrayConstructor || ReqursiveObject;
 			var PrimitiveConstructor = config.PrimitiveConstructor || Primitive;
@@ -696,8 +743,19 @@ define([
             this.elements.wrap.childs.fields.childs.value = new ui.Node({node:"div", ref:"value"}); 
             this.elements.wrap.childs.fields.childs.close = new ui.Node({node:"span", ref:"bracket.close"}); 
             this.updateRef(); 
-            this.ref.arrow.enter.html = function(d, i) { return d.value instanceof Object?ui.symbols.utf8.arrow.right:"" }; 
-            this.ref.key.update.html = function(d, i) { return d.key }; 
+            var valueNode = this.ref.value; 
+            var arrowNode = this.ref.arrow; 
+            this.ref.arrow.update.html = function(d, i) { 
+                var valueDom = d3.select(this.parentNode).select(valueNode.selector).node(); 
+                if (d && d.value instanceof Object){
+                    if (valueDom.uiChild instanceof HiddenObject){ 
+                        return ui.symbols.utf8.arrow.right; 
+                    } 
+                    return ui.symbols.utf8.arrow.down;
+                }
+                return "";
+            }
+            this.ref.key.update.html = function(d, i) { return d?d.key:"" }; 
             var baseUpdate = this.update; 
             this.update = function(config){ 
                 config || (config = {});
@@ -746,42 +804,52 @@ define([
 								partition = new Partition;
 							}
 						}
-                    	targetArray = partitions.map(function(d, i) { return {key:"["+d.start+"..."+d.end+"]", value:d.partition}});
+                    	targetArray = partitions.map(function(d, i) { return {key:"["+d.start+"..."+d.end+"]", value:d.partition, sourceData:sourceData}});
 						
 					}
 					else{
-                    	targetArray = sourceData.map(function(d, i) { return {key:i, value:d}});
+                    	targetArray = sourceData.map(function(d, i) { return {key:i, value:d, sourceData:sourceData}});
 					} 
                 } 
                 else{ 
                     for (var i in sourceData){ 
                         if (!sourceData.hasOwnProperty(i)) continue; 
-                            targetArray.push({key:i, value:sourceData[i]}) 
+                            targetArray.push({key:i, value:sourceData[i], sourceData:sourceData}) 
                     } 
                 } 
+				if (showPrototype && typeof sourceData == "function"){
+					targetArray.push({key:"__proto__", value:sourceData.prototype, sourceData:sourceData});
+				}
+				else if (showConstructor && sourceData && sourceData.constructor){
+					targetArray.push({key:"__constructor__", value:sourceData.constructor, sourceData:sourceData});
+				}
                 return targetArray; 
             }
             function Partition(){};
-            var valueNode = this.ref.value; 
             this.ref.arrow.enter.on.click = function(d, i){ 
                 var valueDom = d3.select(this.parentNode).select(valueNode.selector).node(); 
                 if (d.value instanceof Object){ 
                     if (valueDom.uiChild instanceof HiddenObject){ 
                         valueDom.uiChild.exit(); 
-						if (d.value instanceof Array){ 
-							valueDom.uiChild = new constructors.Array({constructors:constructors});
+						if (typeof d.value == "function"){
+							valueDom.uiChild = new constructors.Function(config);
+						}
+						else if (d.value instanceof Array){ 
+							valueDom.uiChild = new constructors.Array(config);
 						}
 						else{
-							valueDom.uiChild = new constructors.Object({constructors:constructors}); 
+							valueDom.uiChild = new constructors.Object(config); 
 						}
                         valueDom.uiChild.enter(valueDom); 
+                        valueDom.uiChild.update();
                         valueDom.style.display = "block";
                         this.innerHTML = ui.symbols.utf8.arrow.down;
                     } 
                     else{ 
                         valueDom.uiChild.exit(); 
                         valueDom.uiChild = new HiddenObject(); 
-                        valueDom.uiChild.enter(valueDom); 
+                        valueDom.uiChild.enter(valueDom);  
+                        valueDom.uiChild.update();
                         valueDom.style.display = "inline-block"; 
                         this.innerHTML = ui.symbols.utf8.arrow.right;
                     } 
@@ -797,22 +865,37 @@ define([
                 this.entered.each(function(d, i){ 
                     if (d.value instanceof Object){ 
                         this.uiChild = new HiddenObject(); 
-                        this.uiChild.enter(this); 
+                        this.uiChild.enter(this);  
+                        this.uiChild.update();
                     } 
                     else{ 
                         this.uiChild = new constructors.Primitive(); 
-                        this.uiChild.enter(this); 
+                        this.uiChild.enter(this);  
+                        this.uiChild.update();
                     } 
                 }) 
             } 
             this.ref.value.on.update = function(){ 
                 this.selection.each(function(d, i){ 
-                    if (d.value instanceof Object){
-                        if (this.uiChild instanceof constructors.Primitive){
+                    if (typeof d.value == "function"){
+						if (this.uiChild instanceof constructors.Function){
+                            this.uiChild.update();
+						}
+						else{
+							this.uiChild.exit(); 
+                            this.uiChild = new HiddenObject(); 
+                            this.uiChild.enter(this); 
+                            this.uiChild.update();
+                            d3.select(this.parentNode).select(arrowNode.selector).html(ui.symbols.utf8.arrow.right); 
+						}
+					}
+					else if (d.value instanceof Object){
+                        if (this.uiChild instanceof constructors.Primitive || this.uiChild instanceof constructors.Function){
                             this.uiChild.exit(); 
                             this.uiChild = new HiddenObject(); 
                             this.uiChild.enter(this); 
                             this.uiChild.update();
+                            d3.select(this.parentNode).select(arrowNode.selector).html(ui.symbols.utf8.arrow.right); 
                         }
                         else if (this.uiChild instanceof HiddenObject){
                             this.uiChild.update(); 
@@ -820,13 +903,13 @@ define([
 						else{
 							if (d.value instanceof Array && !(this.uiChild instanceof constructors.Array)){
 								this.uiChild.exit(); 
-								this.uiChild = new constructors.Array({constructors:constructors});
+								this.uiChild = new constructors.Array(config);
 								this.uiChild.enter(this); 
 								this.uiChild.update();
 							}
 							else if (!(this.uiChild instanceof constructors.Object)){
 								this.uiChild.exit(); 
-								this.uiChild = new constructors.Object({constructors:constructors});
+								this.uiChild = new constructors.Object(config);
 								this.uiChild.enter(this); 
 								this.uiChild.update();
 							}
@@ -876,6 +959,285 @@ define([
                 data = config.data; 
                 baseUpdate.call(this); 
             }; 
+        }
+        
+		function FunctionListing(config){
+            var mirrowConfig = {
+                lineNumbers:true,
+				readOnly:true,
+                mode:"javascript"
+            };
+            ui.templates.ReqursiveObject.call(this, config);
+			var listing = new ui.Node({ref:"listing"});
+			this.elements.listing = listing;
+			this.updateRef();
+			listing.on.enter = function(){
+                this.entered.each(createMirrow)
+            }
+            listing.on.update = function(){
+                this.selection.each(function(d, i){
+                    
+                })
+            }
+            listing.on.exit = function(){
+                this.exited.each(function(d, i){
+                    
+                })
+            }
+			function createMirrow(d, i){
+                var inputNode = d3.select(this);
+                inputNode.html("");
+                var textarea = inputNode.append("textarea").node();
+                var uiEditor = codemirror.fromTextArea(textarea, mirrowConfig);
+                uiEditor.setValue(d.value.toString());
+                inputNode.uiEditor = uiEditor;
+            }
+		}
+		
+        this.ObjectEditor = ObjectEditor;
+        /**
+         * Редактор объекта
+         @constructor
+        */
+        function ObjectEditor(config){
+            config = config || {};
+            config.constructors = {
+                Object:ObjectEditor,
+                Array:ArrayEditor
+            };
+            config.factory = "ObjectEditor";
+            ui.templates.ReqursiveObject.call(this, config);
+            var self = this;
+            var wrap = this.ref.wrap;
+            var fields = wrap.childs.fields;
+            var remove = new ui.Node({node:"span"});
+            remove.enter.attr.class = "lui-button";
+            remove.enter.on.click = removeField;
+            fields.childs.remove = remove;
+            var editor = new ui.Node();
+            this.elements.setBefore("wrap", "editor", editor);
+            
+            editor.on.enter = function(){
+                this.entered.each(function(d, i){
+                    var uiEditor = new DataEditorWrap();
+                    uiEditor.enter(this);
+                    this.uiEditor = uiEditor;
+                })
+            }
+            editor.on.update = function(){
+                this.selection.each(function(d, i){
+                    this.uiEditor.update();
+                })
+            }
+            editor.on.exit = function(){
+                this.exited.each(function(d, i){
+                    delete this.uiEditor;
+                })
+            }
+            function removeField(d, i){
+                var fieldsDom = this.parentNode;
+                var wrapDom = fieldsDom.parentNode;
+                var editorNode = d3.select(wrapDom.parentNode).select(editor.selector);
+                var editorDom = d3.select(wrapDom.parentNode).select(editor.selector).node();
+                var editorData = editorNode.data()[0];
+                
+                var uiEditor = editorDom.uiEditor;
+                if (editorData.value instanceof Array){
+                    var copy = [].concat(editorData.value);
+                    copy.splice(d.key, 1);
+                }
+                else {
+                    var copy = ui.utils.extend.call({}, editorData.value);
+                    delete copy[d.key];
+                }
+                uiEditor.saveData(editorData, copy);
+            }
+            function DataEditorWrap(){
+                DataEditor.call(this, {
+                    factory:"DataEditor"
+                });
+                this.on("enter", function(){
+                    wrap.selection.style("display", "none");
+                })
+                this.on("edit", function(){
+                    self.update();
+                })
+                this.on("exit", function(){
+                    wrap.selection.style("display", "block");
+                })
+            }
+        }
+        function ToolNode(config){
+            config = config || {};
+            var tools = config.tools || [];
+            ui.Node.call(this, {
+                node:"div"
+            })
+            var self = this;
+            tools.forEach(function(d, i){
+                self.childs[d] = new ui.Node({node:"span", ref:"tools." + d});
+                self.childs[d].enter.attr.class = "lui-button";
+            });
+        }
+        function DataEditor(config){
+            config = config || {};
+            var metaField = config.metaField || "__editor__";
+            ui.Template.call(this, {
+                factory:config.factory || "DataEditor"
+            })
+            var dispatch = d3.dispatch("enter", "exit", "edit");
+            this.on = dispatch.on.bind(dispatch);
+
+            var mirrowConfig = {
+                lineNumbers:true,
+                mode:"json"
+            };
+            var self = this;
+            var editorTools = new ToolNode({
+                tools:["edit", "copy", "upload", "prev", "next"]
+            });
+            var mirrowTools = new ToolNode({
+                tools:["parse", "cancel"]
+            });
+            var input = new ui.Node();
+            var wrap = new ui.Node();
+            this.elements.wrap = wrap;
+            this.elements.wrap.childs.editorTools = editorTools;
+            this.elements.wrap.childs.mirrowTools = mirrowTools;
+            this.elements.wrap.childs.input = input;
+            this.updateRef();
+            wrap.enter = createMeta;
+            mirrowTools.childs.parse.enter.on.click = parseMirrow;
+            mirrowTools.childs.cancel.enter.on.click = removeMirrow;
+            mirrowTools.enter.style.display = "none";
+            
+            
+            editorTools.childs.copy.enter.on.click = saveToClipboard;
+            editorTools.childs.upload.enter.on.click = saveToJson;
+            editorTools.childs.edit.enter.on.click = createMirrow;
+            editorTools.childs.prev.update.style.display = function(d){
+                return getMeta(d).currentCopy > 0?"inline":"none";
+            }
+            editorTools.childs.prev.enter.on.click = prevCopy;
+            editorTools.childs.next.enter.on.click = nextCopy;
+            
+            editorTools.childs.next.update.style.display = function(d){
+                return getMeta(d).currentCopy < getMeta(d).history.length - 1?"inline":"none";
+            }
+            
+            input.on.update = function(){
+                this.selection.each(function(d, i){
+                    var wrapDom = this.parentNode;
+                    if (wrapDom.uiEditor)
+                        wrapDom.uiEditor.setValue(JSON.stringify(d.value, null, 4));
+                })
+            }
+            input.on.exit = function(){
+                this.exited.each(function(d, i){
+                    var wrapDom = this.parentNode.parentNode;
+                    delete wrapDom.uiEditor;
+                })
+            }
+            this.saveData = saveData;
+            function saveToJson(d, i){
+                ui.utils.savers.json({
+                    filename:d.key+".json",
+                    data:d.value
+                });
+            }
+            function saveToClipboard(d, i){
+                ui.utils.savers.clipboard(JSON.stringify(d.value, null, 4));
+            }
+            function createMirrow(d, i){
+                editorTools.selection.style("display", "none");
+                mirrowTools.selection.style("display", "block");
+                var wrapDom = this.parentNode.parentNode;
+                var inputNode = d3.select(wrapDom).select(input.selector);
+                inputNode.html("");
+                var textarea = inputNode.append("textarea").node();
+                var uiEditor = codemirror.fromTextArea(textarea, mirrowConfig);
+                uiEditor.setValue(JSON.stringify(d.value, null, 4));
+                wrapDom.uiEditor = uiEditor;
+                dispatch.call("enter");
+            }
+            function parseMirrow(d, i){
+                var wrapDom = this.parentNode.parentNode;
+                var uiEditor = wrapDom.uiEditor;
+                var json = uiEditor.getValue();
+                var object;
+                try{
+                    object = JSON.parse(json);
+                }
+                catch(e){
+                    alert(e);
+                }
+                if (object){
+                    saveData(d, object);
+                    removeMirrow.call(this);
+                }
+            }
+            function removeMirrow(d, i){
+                editorTools.selection.style("display", "block");
+                mirrowTools.selection.style("display", "none");
+                var wrapDom = this.parentNode.parentNode;
+                var inputNode = d3.select(wrapDom).select(input.selector);
+                inputNode.html("");
+                delete wrapDom.editor;
+                dispatch.call("exit");
+            }
+            function nextCopy(d, i){
+                var meta = getMeta(d);
+                meta.currentCopy++;
+                updateNodeData(d, meta.history[meta.currentCopy]);
+            }
+            function prevCopy(d, i){
+                var meta = getMeta(d);
+                meta.currentCopy--;
+                updateNodeData(d, meta.history[meta.currentCopy]);
+            }
+            function updateNodeData(nodeData, newData){
+				if (nodeData.value instanceof Array){
+					nodeData.value.splice(0, nodeData.value.length);
+					newData.forEach(function(d){
+						nodeData.value.push(d);
+					})
+				}
+				else {					
+					ui.utils.each.call(nodeData.value, function(d, i){
+						delete nodeData.value[i];
+					})
+					ui.utils.extend.call(nodeData.value, newData)
+                }
+                dispatch.call("edit");
+                self.update();
+            }
+            function saveData(nodeData, newData){
+                var copy = ui.utils.extend.call({}, nodeData.value);
+                var meta = getMeta(nodeData);
+                if (meta.currentCopy != meta.history.length - 1){
+                    var deleteStart = meta.currentCopy + 1;
+                    var deleteCount = meta.history.length - 1 - meta.currentCopy;
+                    meta.history.splice(deleteStart, deleteCount);
+                }
+                meta.history.push(newData);
+                meta.currentCopy = meta.history.length - 1;
+                
+                updateNodeData(nodeData, newData);
+            }
+            function createMeta(d){
+                var copy = ui.utils.extend.call({}, d.value);
+                d[metaField] = d[metaField] || {history:[copy], currentCopy:0};
+            }
+            function getMeta(d){
+                d[metaField] || createMeta(d);
+                return d[metaField];
+            }
+            
+        }
+        this.ArrayEditor = ArrayEditor;
+        function ArrayEditor(config){
+            config = config || {};
+            ObjectEditor.call(this, config);
         }
 		function ReqursiveXml(config){ 
             config || (config = {});
@@ -3215,8 +3577,8 @@ define([
                         var storedMeta = templateNestMeta.get(this.meta.path);
 						if (storedMeta.selected == value) return;
 						storedMeta.selected = value;
-						if (storedMeta.selected >= this.values.length) storedMeta.selected = this.values.length - 1;
-						if (storedMeta.selected < 0) storedMeta.selected = 0;
+						if (storedMeta.selected >= this.values.length) storedMeta.selected = 0;
+						if (storedMeta.selected < 0) storedMeta.selected = this.values.length - 1;
 					},
                     get:function() { 
                         //return this.values[this.meta.selected] 
@@ -3766,6 +4128,7 @@ define([
             ui.utils.each.call(obj, function(value, key){
                 self[key] = value;
             })
+            return this;
         }
         function each(func, recursive){
             var constName = this.constructor.name;
@@ -3824,6 +4187,7 @@ define([
         function Savers(){
             this.csv = csv;
             this.json = json;
+            this.clipboard = clipboard;
             function csv(config){
                 config || (config = {})
                 var filename = config.filename || "export.csv";
@@ -3843,6 +4207,18 @@ define([
                 var blob = new Blob([txt], {type:"text/json;charset=utf-8"});
                 saveAs(blob, filename);
             }
+            function clipboard(text){
+                var temp = new ui.templates.BasicTemplate({
+                    elements:{
+                        text:"textarea"
+                    }
+                })
+                temp.ref.text.enter.property.value = text;
+                temp.enter(document.body);
+                temp.ref.text.selection.node().select();
+                document.execCommand("copy");
+                temp.exit();
+            }
         }
     }
     function uiSymbols(){
@@ -3858,6 +4234,10 @@ define([
 		d3.selection.prototype.applyAll = applyAll;
 		d3.transition.prototype.apply = apply;
 		d3.transition.prototype.applyAll = applyAll;
+        d3.dispatch.prototype.addEvent = addEvent;
+        function addEvent(name){
+            this["_"][name] = [];            
+        }
         function apply(func, struct){
             var context = this;
             if (func !== "attr" && func !== "property" && func !== "on" && func !== "classed" && func !== "style"){
@@ -3915,7 +4295,7 @@ define([
                 }
             }
             else{
-                if (typeof struct === "undefined") debugger;
+                if (typeof struct === "undefined") return context;
                 if (struct.call) context.apply("call", struct.call);
                 if (struct.html) context.apply("html", struct.html);
                 for (var func in struct){
@@ -3925,7 +4305,7 @@ define([
                     }
                 }
             }
-            return this;
+            return context;
         }
     }
     return ui;

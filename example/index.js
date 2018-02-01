@@ -5,7 +5,9 @@ require.config({
 		ui:"../ui",
 		css:"../lib/css",
 		text:"../lib/text",
-		moment:"../lib/moment"        
+		moment:"../lib/moment",
+		codemirror:"../lib/codemirror",
+		javascript:"../lib/javascript"     
     }
 });
 
@@ -15,7 +17,9 @@ require([
     "examples/InputTable/InputTable",
     "examples/ReqursiveObject/ReqursiveObject",
     "examples/ReqursiveXml/ReqursiveXml",
-    "examples/RegularPolygon/RegularPolygon"
+    "examples/RegularPolygon/RegularPolygon",
+    "examples/ObjectEditor/ObjectEditor",
+    "examples/Chat/Chat"
 ], 
 function (  
     d3,
@@ -23,7 +27,9 @@ function (
     InputTable,
     ReqursiveObject,
     ReqursiveXml,
-    RegularPolygon
+    RegularPolygon,
+    ObjectEditor,
+    Chat
 ){	
     var examples = [
         {
@@ -41,7 +47,15 @@ function (
         {
             label:"RegularPolygon",
             constructor:RegularPolygon
-        }
+        },
+        {
+            label:"ObjectEditor",
+            constructor:ObjectEditor
+        }/*,
+        {
+            label:"Chat",
+            constructor:Chat
+        }*/
     ]
     var exampleSelect = new ui.templates.SelectBox();
     exampleSelect.ref.option.data.array = examples;
@@ -64,6 +78,7 @@ function (
    
     templateTree.enter(layout.ref.graph);
     templateTree.setRoot(document.body);
+    
         
 	function Layout(templateDef){
 		templateDef || (templateDef = {});

@@ -59,6 +59,54 @@
 	margin:0px 0px 0px 5px;
 	color:rgb(26,26,166);
 }
+
+[d3ui-factory=ObjectEditor][d3ui-node=fields]{
+	padding:0px 0px 0px 15px;
+}
+[d3ui-factory=ObjectEditor][d3ui-node=arrow]{
+	cursor:pointer;
+}
+[d3ui-factory=ObjectEditor][d3ui-node=remove],
+[d3ui-factory=DataEditor][d3ui-node=prev],
+[d3ui-factory=DataEditor][d3ui-node=next],
+[d3ui-factory=DataEditor][d3ui-node=edit],
+[d3ui-factory=DataEditor][d3ui-node=copy],
+[d3ui-factory=DataEditor][d3ui-node=upload],
+[d3ui-factory=DataEditor][d3ui-node=parse],
+[d3ui-factory=DataEditor][d3ui-node=cancel]{
+    padding:0px 3px 0px 3px;
+}
+[d3ui-factory=ObjectEditor][d3ui-node=remove]:after{
+    content:"x";
+}
+[d3ui-factory=DataEditor][d3ui-node=edit]:after{
+    content:"edit";
+}
+[d3ui-factory=DataEditor][d3ui-node=copy]:after{
+    content:"copy";
+}
+[d3ui-factory=DataEditor][d3ui-node=upload]:after{
+    content:"upload";
+}
+[d3ui-factory=DataEditor][d3ui-node=parse]:after{
+    content:"parse";
+}
+[d3ui-factory=DataEditor][d3ui-node=cancel]:after{
+    content:"cancel";
+}
+[d3ui-factory=DataEditor][d3ui-node=prev]:after{
+    content:"<";
+}
+[d3ui-factory=DataEditor][d3ui-node=next]:after{
+    content:">";
+}
+[d3ui-factory=ObjectEditor][d3ui-node=key]{
+	color:rgb(136,19,145);
+}
+[d3ui-factory=ObjectEditor][d3ui-node=constructor]{
+	margin:0px 0px 0px 5px;
+	color:rgb(26,26,166);
+}
 [d3ui-factory=ReqursiveXml][d3ui-node=nodes]{
 	padding:0px 0px 0px 15px;
 }
