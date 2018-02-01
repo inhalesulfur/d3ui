@@ -5,12 +5,12 @@ define([
 function (  
     d3,
     ui
-){	
+){    
     function ReqursiveObject(){
         var uiObject = new ui.templates.ReqursiveObject({
-			showPrototype:true,
-			showConstructor:true
-		});
+            showPrototype:true,
+            showConstructor:true
+        });
         this.enter = function(uiParentNode){
             uiObject.enter(uiParentNode);
             uiObject.update({data:{ui:ui}});

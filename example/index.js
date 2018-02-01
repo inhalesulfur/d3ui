@@ -1,13 +1,13 @@
 
 require.config({
     paths: {
-		d3:"../lib/d3",
-		ui:"../ui",
-		css:"../lib/css",
-		text:"../lib/text",
-		moment:"../lib/moment",
-		codemirror:"../lib/codemirror",
-		javascript:"../lib/javascript"     
+        d3:"../lib/d3",
+        ui:"../ui",
+        css:"../lib/css",
+        text:"../lib/text",
+        moment:"../lib/moment",
+        codemirror:"../lib/codemirror",
+        javascript:"../lib/javascript"     
     }
 });
 
@@ -30,7 +30,7 @@ function (
     RegularPolygon,
     ObjectEditor,
     Chat
-){	
+){    
     var examples = [
         {
             label:"InputTable",
@@ -69,7 +69,7 @@ function (
     };
     
     var example = new examples[0].constructor;
-	var templateTree = new ui.dev.TemplateTree;
+    var templateTree = new ui.dev.TemplateTree;
     var layout = new Layout();
     
     layout.enter(document.body);  
@@ -80,25 +80,25 @@ function (
     templateTree.setRoot(document.body);
     
         
-	function Layout(templateDef){
-		templateDef || (templateDef = {});
-		ui.Template.call(this, {factory:"Layout", module:templateDef.module});
-		this.elements.head = new ui.Node({ref:"head"});
-		this.elements.body = new ui.Node({ref:"body"});
-		this.elements.graph = new ui.Node({ref:"graph"});
-		this.updateRef();
-		this.ref.head.enter.style.width = "100%";
-		this.ref.head.enter.style.height = "30px";
-		this.ref.body.enter.style.width = "100%";
-		this.ref.body.enter.style.height = "270px";
-		this.ref.body.enter.style.overflow = "hidden";
-		this.ref.graph.enter.style.overflow = "hidden";
-		this.ref.graph.enter.style.height = "calc(100% - 300px)";
-		this.ref.graph.enter.style.position = "relative";
-		this.ref.body.enter.style.position = "relative";
-		this.ref.body.enter.style.overflow = "auto";
-	}
-	
+    function Layout(templateDef){
+        templateDef || (templateDef = {});
+        ui.Template.call(this, {factory:"Layout", module:templateDef.module});
+        this.elements.head = new ui.Node({ref:"head"});
+        this.elements.body = new ui.Node({ref:"body"});
+        this.elements.graph = new ui.Node({ref:"graph"});
+        this.updateRef();
+        this.ref.head.enter.style.width = "100%";
+        this.ref.head.enter.style.height = "30px";
+        this.ref.body.enter.style.width = "100%";
+        this.ref.body.enter.style.height = "270px";
+        this.ref.body.enter.style.overflow = "hidden";
+        this.ref.graph.enter.style.overflow = "hidden";
+        this.ref.graph.enter.style.height = "calc(100% - 300px)";
+        this.ref.graph.enter.style.position = "relative";
+        this.ref.body.enter.style.position = "relative";
+        this.ref.body.enter.style.overflow = "auto";
+    }
+    
     $(window).resize(function(){
     });
 });

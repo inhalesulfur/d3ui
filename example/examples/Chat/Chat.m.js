@@ -1,12 +1,12 @@
 define( [ 
-	"d3",
-	"ui",
-	"moment",
-	"./ChatBotApi"
+    "d3",
+    "ui",
+    "moment",
+    "./ChatBotApi"
 ], function ( 
-	d3,
+    d3,
     ui,
-	moment,
+    moment,
     ChatBot
 ){ 
     function Chat(moduleDef){
@@ -23,7 +23,7 @@ define( [
         var messager = new Messager(user);
         this.on = dispatch.on.bind(dispatch);
         this.messager = messager;        
-	}
+    }
     function Messager(user){
         var helloCount = 0;
         var helloFlag = false;
@@ -287,5 +287,5 @@ define( [
             })
         }
     }
-	return Chat;
+    return Chat;
 } );

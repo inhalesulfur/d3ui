@@ -5,7 +5,7 @@ define([
 function (  
     d3,
     ui
-){	
+){
     function ReqursiveObject(){
         var uiObject = new ui.templates.ReqursiveXml();
         this.enter = function(uiParentNode){

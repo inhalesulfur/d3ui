@@ -5,7 +5,7 @@ define([
 function (  
     d3,
     ui
-){	
+){    
     function RegularPolygon(){
         var faces = [1, 2, 3];
         
@@ -36,23 +36,23 @@ function (
         }
     }
     function Layout(templateDef){
-		templateDef || (templateDef = {});
-		ui.Template.call(this, {factory:"Layout", module:templateDef.module});
-		this.elements.head = new ui.Node({ref:"head"});
-		this.elements.body = new ui.Node({ref:"body"});
-		this.updateRef();
-		this.ref.head.enter.style.height = "30px";
-		this.ref.body.enter.style.width = "300px";
-		this.ref.body.enter.style.height = "calc(100% - 30px)";
-		this.ref.body.enter.style.position = "relative";
-		this.ref.body.enter.style.overflow = "hidden";
-	}
+        templateDef || (templateDef = {});
+        ui.Template.call(this, {factory:"Layout", module:templateDef.module});
+        this.elements.head = new ui.Node({ref:"head"});
+        this.elements.body = new ui.Node({ref:"body"});
+        this.updateRef();
+        this.ref.head.enter.style.height = "30px";
+        this.ref.body.enter.style.width = "300px";
+        this.ref.body.enter.style.height = "calc(100% - 30px)";
+        this.ref.body.enter.style.position = "relative";
+        this.ref.body.enter.style.overflow = "hidden";
+    }
     function Placeholder(templateDef){
-		templateDef || (templateDef = {});
-		ui.Template.call(this, {factory:"Placeholder", module:templateDef.module});
-		this.elements.content = new ui.Node({ref:"content"});
-		this.updateRef();
-	}
+        templateDef || (templateDef = {});
+        ui.Template.call(this, {factory:"Placeholder", module:templateDef.module});
+        this.elements.content = new ui.Node({ref:"content"});
+        this.updateRef();
+    }
     RegularPolygon.desc = "";
     return RegularPolygon;
 });

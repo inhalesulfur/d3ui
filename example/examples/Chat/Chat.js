@@ -1,17 +1,17 @@
 // JavaScript
 define( [ 
-	"d3",
-	"ui",
-	"./Chat.m",
+    "d3",
+    "ui",
+    "./Chat.m",
     "css!./Chat.css"
 ], function ( 
-	d3,
+    d3,
     ui,
-	Model
+    Model
 ){
     var uiNode = ui.Node;
     var uiTemplate = ui.Template;
-	var DropButton = ui.templates.DropButton;
+    var DropButton = ui.templates.DropButton;
     var messageTypes ={
         error:ErrorMessage,
         connectionError:ConnectionErrorMessage,
@@ -41,12 +41,12 @@ define( [
             left: 110 - width + "px",
             top: 44 - height + "px"
         }}*/
-		this.enter = function(){
-			
-		}
-		this.exit = function(){
-			chatButton.exit();
-		}
+        this.enter = function(){
+            
+        }
+        this.exit = function(){
+            chatButton.exit();
+        }
         var hideDropStyle = function(){ return{
             position:"absolute",
             width: width + "px",
@@ -154,7 +154,7 @@ define( [
         this.resize = function(){
             chatButton.hide();
         }
-	}
+    }
     function Layout(templateDef){
         templateDef || (templateDef = {});
         uiTemplate.call(this, {factory:"Layout", module:templateDef.module});
@@ -522,6 +522,6 @@ define( [
         this.elements.upload = devButton;
         this.elements.body = body;
     }
-	return Chat;
+    return Chat;
 
 } );
