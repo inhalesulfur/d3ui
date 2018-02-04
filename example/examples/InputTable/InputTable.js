@@ -6,7 +6,7 @@ function (
     d3,
     ui
 ){	
-    function InputTable(){
+    function InputTableExample(){
         var rows = [
             {cells:[{value:Math.random()}, {value:Math.random()}, {value:Math.random()}]},
             {cells:[{value:Math.random()}, {value:Math.random()}, {value:Math.random()}]},
@@ -42,8 +42,8 @@ function (
         }; 
         inputBox.ref.input.update.property.value = function(d, i) { return d.value };
         
-        table.enter(document.body);
-        inputBox.enter(table.ref.cells);
+       // table.enter(document.body);
+        //inputBox.enter(table.ref.cells);
                
         this.enter = function(uiParentNode){
             randButton.enter(uiParentNode);
@@ -58,13 +58,18 @@ function (
             updateLog.exit();
         }
     }
-    InputTable.desc = "Визуализация таблицы с полями ввода для каждой ячейки";
+    InputTableExample.desc = "Визуализация таблицы с полями ввода для каждой ячейки";
     
     function Table(){
         ui.Template.call(this, {factory:"Table"});
         this.elements.wrap = new ui.Node({node:"table", ref:"wrap"});
         this.elements.wrap.childs.rows = new ui.Node({node:"tr", ref:"rows"});
         this.elements.wrap.childs.rows.childs.cells = new ui.Node({node:"td", ref:"cells"});
+        this.updateRef();
+    }
+	function InputTable(){
+        Table.call(this);
+		this.ref.cells.childs.input = new ui.Node({node:"input", ref:"input"});
         this.updateRef();
     }
     function InputBox(){
@@ -102,5 +107,5 @@ function (
     }
     
     
-    return InputTable;
+    return InputTableExample;
 });

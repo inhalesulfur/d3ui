@@ -18,6 +18,7 @@ define( [
         text:TextMessage,
         json:JsonMessage,
         kpi:KpiMessage,
+        example:ExampleMessage,
         option:OptionMessage,
         unknown:UnknownMessage
     }
@@ -73,7 +74,7 @@ define( [
             left: this.parentNode.clientWidth - buttonWidth - width + "px",
             top: this.parentNode.clientHeight*0.5 - buttonHeight *0.5 + "px"
         }}
-        var chatButton = new DropButton({module:module});
+        var chatButton = new DropButton({module:module, autoHide:false});
         var label = new ui.Node({node:"span"});
         label.enter.html = "Чат";
         chatButton.ref.button.childs.label = label;
@@ -132,9 +133,13 @@ define( [
                     var message = new Constractor({module:module, message:d, messager:model.messager});
                     message.enter(this);
                 } 
-                
+				else {
+                    var message = new TextMessage({module:module, message:d, messager:model.messager});
+                    message.enter(this);
+                }
+                /*
                 var dev = new JsonMessage({module:module, message:{dev:d}, messager:model.messager});
-                dev.enter(this); 
+                dev.enter(this);*/ 
             })
         }
         messageBox.enter(layout.ref.body);
@@ -315,23 +320,26 @@ define( [
         
         var dispatch = d3.dispatch("submit");
         this.on = dispatch.on.bind(dispatch);
-        this.elements.group = new uiNode({ref:"group"});
-        this.elements.group.childs.input = new uiNode({node:"input", ref:"input"});
-        this.elements.group.childs.submit = new uiNode({ref:"submit"});
-        this.elements.group.childs.submit.childs.button = new uiNode({node:"button", ref:"button"});
-        
+		
+		var group = new uiNode({ref:"group"});
+		var input = new uiNode({node:"input", ref:"input"});
+		var button = new uiNode({node:"button", ref:"button"});
+		var icon = new uiNode({node:"span", ref:"icon"});
+		
+        this.elements.group = group;
+		group.childs.input = input;
+		group.childs.button = button;
+		button.childs.icon = icon;
+		        
         this.updateRef();   
         
-        this.ref.group.enter.attr.class = "input-group";
-        this.ref.input.enter.attr.class = "form-control";
-        this.ref.input.enter.attr.type = "text";
-        this.ref.input.enter.attr.placeholder = "Напишите сообщение";
-        this.ref.submit.enter.attr.class = "input-group-btn";
-        this.ref.button.enter.attr.class = "btn btn-default";
-        this.ref.button.enter.attr.type = "submit";
-        this.ref.button.enter.html = "Отправить";
-        var input = this.ref.input;
-        this.ref.submit.enter.on.click = function(){
+        group.enter.attr.class = "lui-input-group";
+        input.enter.attr.class = "lui-input-group__item  lui-input-group__input  lui-input";
+        input.enter.attr.placeholder = "Напишите сообщение";
+        button.enter.attr.class = "lui-input-group__item  lui-input-group__button  lui-button";
+        button.enter.attr.type = "submit";
+        button.enter.html = "Отправить";
+        button.enter.on.click = function(){
             var value = input.selection.property("value");
             input.selection.property("value", "");
             dispatch.call("submit", null, value);
@@ -395,7 +403,7 @@ define( [
         uiTemplate.call(this, {factory:"TextMessage", module:templateDef.module});
         this.elements.body = new uiNode({ref:"body"});
         this.updateRef();
-        this.ref.body.enter.html = function() { return message.data.textMessage };
+        this.ref.body.enter.html = function(d) { return d.data.textMessage || d.data };
     }
     function UnknownMessage(templateDef){
         templateDef || (templateDef = {});
@@ -408,6 +416,18 @@ define( [
         this.ref.questions.data.array = function(){return message.data.questions };
         this.ref.questions.enter.html = function(d, i) { return d.query.map(function(d) { return "{"+d+"}"}).reduce(ui.utils.concater(" ")) }
         
+    }
+    function ExampleMessage(templateDef){
+        templateDef || (templateDef = {});
+        var message = templateDef.message;
+        uiTemplate.call(this, {factory:"ExampleMessage", module:templateDef.module});
+        var example = new uiNode({ref:"example"});
+        this.elements.example = example;
+        example.on.enter = function(){
+            this.entered.each(function(){
+                (new message.data.constructor).enter(this);
+            })
+        }
     }
     function KpiMessage(templateDef){
         templateDef || (templateDef = {});

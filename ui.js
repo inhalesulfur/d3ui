@@ -3,6 +3,7 @@
     "moment",
     "codemirror",
     "javascript",
+    "formatting",
     "css!codemirror.css",
     "css!ui.css"
 ],function (
@@ -339,8 +340,13 @@
             element.childs.each(exitElement);
             if (element.exited && element.exited.nodes().length) {
                 element.on.exit && element.on.exit.call(element);
+                element.exited.on(".");
+                element.exited.each(function(){
+                    delete this["__data__"];
+                    delete this["__on"];
+                })
             }
-            if (top === true) element.exited.remove();
+            element.exited.remove();
             delete element.exited;
             
             callTemplateDispatch("update");
@@ -993,7 +999,10 @@
                 var textarea = inputNode.append("textarea").node();
                 var uiEditor = codemirror.fromTextArea(textarea, mirrowConfig);
                 uiEditor.setValue(d.value.toString());
+                /*
+                codemirror.commands["selectAll"](uiEditor);
                 inputNode.uiEditor = uiEditor;
+                uiEditor.autoFormatRange(uiEditor.getCursor(true), uiEditor.getCursor(false));*/
             }
         }
         

@@ -7,56 +7,22 @@ require.config({
         text:"../lib/text",
         moment:"../lib/moment",
         codemirror:"../lib/codemirror",
-        javascript:"../lib/javascript"     
+        javascript:"../lib/javascript",
+        formatting:"../lib/formatting",
+        examples:"examples"     
     }
 });
 
 require([
     "d3",
     "ui",
-    "examples/InputTable/InputTable",
-    "examples/ReqursiveObject/ReqursiveObject",
-    "examples/ReqursiveXml/ReqursiveXml",
-    "examples/RegularPolygon/RegularPolygon",
-    "examples/ObjectEditor/ObjectEditor",
-    "examples/Chat/Chat"
+    "examples"
 ], 
 function (  
     d3,
     ui,
-    InputTable,
-    ReqursiveObject,
-    ReqursiveXml,
-    RegularPolygon,
-    ObjectEditor,
-    Chat
+    examples
 ){    
-    var examples = [
-        {
-            label:"InputTable",
-            constructor:InputTable
-        },
-        {
-            label:"ReqursiveObject",
-            constructor:ReqursiveObject
-        },
-        {
-            label:"ReqursiveXml",
-            constructor:ReqursiveXml
-        },
-        {
-            label:"RegularPolygon",
-            constructor:RegularPolygon
-        },
-        {
-            label:"ObjectEditor",
-            constructor:ObjectEditor
-        }/*,
-        {
-            label:"Chat",
-            constructor:Chat
-        }*/
-    ]
     var exampleSelect = new ui.templates.SelectBox();
     exampleSelect.ref.option.data.array = examples;
     exampleSelect.ref.option.enter.html = function(d, i) { return d.label };

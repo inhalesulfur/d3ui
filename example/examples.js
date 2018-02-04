@@ -1,0 +1,52 @@
+define([
+    "examples/Table/Table",
+    "examples/InputTable/InputTable",
+    "examples/ReqursiveObject/ReqursiveObject",
+    "examples/ReqursiveXml/ReqursiveXml",
+    "examples/RegularPolygon/RegularPolygon",
+    "examples/ObjectEditor/ObjectEditor",
+    "examples/Chat/Chat"
+], 
+function (  
+    Table,
+    InputTable,
+    ReqursiveObject,
+    ReqursiveXml,
+    RegularPolygon,
+    ObjectEditor,
+    Chat
+){    
+	function examples(){
+		return [
+			{
+				label:"Table",
+				constructor:Table
+			},
+			{
+				label:"InputTable",
+				constructor:InputTable
+			},
+			{
+				label:"ReqursiveObject",
+				constructor:ReqursiveObject
+			},
+			{
+				label:"ReqursiveXml",
+				constructor:ReqursiveXml
+			},
+			{
+				label:"RegularPolygon",
+				constructor:RegularPolygon
+			},
+			{
+				label:"ObjectEditor",
+				constructor:ObjectEditor
+			},
+			{
+				label:"Chat",
+				constructor:Chat
+			}
+		]
+	}
+	return examples();
+});

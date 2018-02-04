@@ -2,13 +2,24 @@ define( [
     "d3",
     "ui",
     "moment",
+    "../../examples.js",
     "./ChatBotApi"
 ], function ( 
     d3,
     ui,
     moment,
+    examples,
     ChatBot
 ){ 
+    var exampleOptions = new ui.utils.IndexedArray({index:function(d) { return d.request }});
+    exampleOptions.concat(examples.filter(function(d) { return d.label != "Chat"})
+    .map(function(d){
+        return {
+            label:d.label,
+            request:"/"+d.label,
+            constructor:d.constructor
+        }
+    }));
     function Chat(moduleDef){
         var currentUser = {
             user_fullname:"Петухов Александр Николаевич",
@@ -87,6 +98,28 @@ define( [
             dispatch.call("message");
         }
         function sendRequest(msg){
+            if (msg === "/help") {
+                pushMessage(new Message(chatBot, "option", {
+                    question:"Что вас интересует?",
+                    options:exampleOptions.array
+                }));
+            }
+            else if (exampleOptions.map.has(msg)){
+                var example = exampleOptions.get(msg);
+                pushMessage(new Message(chatBot, "example", example));
+            }
+            /*
+            else{
+                chatBot.request(user.id, msg)
+                .then(function(response){
+                    pushMessage(new Message(chatBot, response.type, response));
+                })
+                .catch(processError)
+            }*/
+            
+        }
+        /*
+        function sendRequest(msg){
             if (msg === "отмена" || msg === "Отмена") {
                 reset();
                 chatBot.request(user.id, msg)
@@ -104,7 +137,7 @@ define( [
                 .catch(processError)
             }
             
-        }
+        }*/
         function Message(sender, type, data){
             this.sender = sender;
             this.type = type;

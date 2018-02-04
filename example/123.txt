@@ -1,0 +1,105 @@
+
+        var table = new InputTable();
+        table.ref.rows.data.array = function() { return rows}; 
+        table.ref.cells.data.array = function(d, i) {return d.cells};
+		table.ref.cells.update.html = function(d) { return d.value};
+
+		var table = new InputTable();
+        table.ref.rows.data.array = function() { return rows}; 
+        table.ref.cells.data.array = function(d, i) {return d.cells};
+        table.ref.input.enter.classed["lui-input"] = true;
+        table.ref.input.enter.on.input = function(d, i) { 
+            d.value = this.value;
+            updateLog.log("Обновлено значение " + d.value);
+        }; 
+        table.ref.input.update.property.value = function(d, i) { return d.value };
+		
+		
+		var inputBox = new InputBox();
+        inputBox.ref.input.enter.classed["lui-input"] = true;
+        inputBox.ref.input.enter.on.input = function(d, i) { 
+            d.value = this.value;
+            updateLog.log("Обновлено значение " + d.value);
+        }; 
+        inputBox.ref.input.update.property.value = function(d, i) { return d.value };
+		
+		
+		var table = d3.select(document.body).append("table");
+		
+		var rowJoin = table.selectAll("tr").data(function(){ return rows });
+		var enteredRows = rowJoin.enter().append("tr");
+		rowJoin.exit().remove();
+		var rows = enteredRows.merge(rowJoin);
+		
+		var cellJoin = rows.selectAll("td").data(function(d, i) { return d.cells })
+		var enteredCells = cellJoin.enter().append("td");
+		cellJoin.exit().remove();
+		var cells = enteredCells.merge(cellJoin);
+		cells.html(function(d) { return d.value });
+		
+		var enteredInputs = enteredCells.append("input");
+		var inputs = cells.selectAll("input");
+        
+        
+        d3.select("body").selectAll("input")
+            .attr("class", "lui-input")
+            .attr("type", "number")
+            .property("value", function(d, i) { return d.value })
+            .classed("hide", function(d, i) { return checkHide(d, i)})
+            .on("input", function() {})
+            .style("left", function(d, i) { return calcLeft(d, i)})
+            .style("top", function(d, i) { return calcTop(d, i)})
+            .style("width", function(d, i) { return calcWidth(d, i)})
+            .style("height", function(d, i) { return calcHeight(d, i)})
+            
+        d3.select("body").selectAll("input")
+            .style("left", function(d, i) { return calcLeft(d, i)})
+            .style("top", function(d, i) { return calcTop(d, i)})
+            .style("width", function(d, i) { return calcWidth(d, i)})
+            .style("height", function(d, i) { return calcHeight(d, i)})
+        
+        var inputStyle = {
+            left:function(d, i) { return calcLeft(d, i)},
+            top:function(d, i) { return calcTop(d, i)},
+            width:function(d, i) { return calcWidth(d, i)},
+            height:function(d, i) { return calcHeight(d, i)},
+        }
+        d3.select("body").selectAll("input")
+            .apply("style", inputStyle);
+            
+        var inputStyle = function(d, i){
+            return {
+                left:calcLeft(d, i),
+                top:calcTop(d, i),
+                width:calcWidth(d, i),
+                height:calcHeight(d, i)
+            }
+        }
+        d3.select("body").selectAll("input")
+            .apply("style", inputStyle);
+        
+        var inputProp = {
+            attr:{
+                class:"lui-input",
+                type:"number"
+            },
+            property:{
+                value:function(d, i) { return d.value })
+            },
+            classed:{
+                hide:function(d, i) { return checkHide(d, i)})
+            },
+            style:{
+                left:function(d, i) { return calcLeft(d, i)},
+                top:function(d, i) { return calcTop(d, i)},
+                width:function(d, i) { return calcWidth(d, i)},
+                height:function(d, i) { return calcHeight(d, i)},
+            },
+            on:{
+                input:function(){}
+            }
+        }
+        
+        d3.select("body").selectAll("input")
+            .applyAll(inputProp);
+            

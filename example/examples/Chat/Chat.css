@@ -65,6 +65,9 @@
     display:table-cell;
     vertical-align:top;
 }
+[d3ui-module=Chat][d3ui-factory=MessageBox][d3ui-node=body]{
+    max-height:300px;
+}
 [d3ui-module=Chat][d3ui-factory=MessageBox][d3ui-node=sender]{
     font-weight:bold;
 }
@@ -80,12 +83,21 @@
     background:#fea300;
     //background: rgb(74, 163, 0);
     text-align:center;
+	display:flex;
+	align-items:center;
+	justify-content: center;
 }
 [d3ui-module=Chat][d3ui-factory=UserIcon][d3ui-node=text]{
     font-size: 16px;
     color: white;
-    vertical-align: middle;
     line-height: normal;
+}
+
+
+/* ExampleMessage */
+[d3ui-module=Chat][d3ui-factory=ExampleMessage][d3ui-node=example]{
+    height:300px;
+    overflow:auto;
 }
 /* KpiMessage */
 [d3ui-module=Chat][d3ui-factory=KpiMessage][d3ui-node=key]{
